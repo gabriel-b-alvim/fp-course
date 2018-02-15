@@ -92,8 +92,9 @@ headOr _ (y :. _) = y
 product ::
   List Int
   -> Int
-product =
-  error "todo: Course.List#product"
+product Nil = 1
+product (a :. as) = a * product as
+
 
 -- | Sum the elements of the list.
 --
