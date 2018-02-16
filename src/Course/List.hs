@@ -71,10 +71,7 @@ foldLeft f b (h :. t) = let b' = f b h in b' `seq` foldLeft f b' t
 -- prop> \x -> x `headOr` infinity == 0
 --
 -- prop> \x -> x `headOr` Nil == x
-headOr ::
-  a
-  -> List a
-  -> a
+headOr :: a -> List a -> a
 headOr x Nil = x
 headOr _ (y :. _) = y
 
@@ -89,9 +86,7 @@ headOr _ (y :. _) = y
 --
 -- >>> product (1 :. 2 :. 3 :. 4 :. Nil)
 -- 24
-product ::
-  List Int
-  -> Int
+product :: List Int -> Int
 product Nil = 1
 product (a :. as) = a * product as
 
@@ -105,9 +100,7 @@ product (a :. as) = a * product as
 -- 10
 --
 -- prop> \x -> foldLeft (-) (sum x) x == 0
-sum ::
-  List Int
-  -> Int
+sum :: List Int -> Int
 sum Nil = 0
 sum (a :. as) = a + sum as
 
@@ -117,9 +110,7 @@ sum (a :. as) = a + sum as
 -- 3
 --
 -- prop> \x -> sum (map (const 1) x) == length x
-length ::
-  List a
-  -> Int
+length :: List a -> Int
 length Nil = 0
 length (_ :. as) = 1 + length as
 
@@ -131,10 +122,7 @@ length (_ :. as) = 1 + length as
 -- prop> \x -> headOr x (map (+1) infinity) == 1
 --
 -- prop> \x -> map id x == x
-map ::
-  (a -> b)
-  -> List a
-  -> List b
+map :: (a -> b) -> List a -> List b
 map _ Nil = Nil
 map func (a :. Nil) = (func a :. Nil)
 map func (a :. as) = ((func a) :. map func as)
@@ -149,13 +137,9 @@ map func (a :. as) = ((func a) :. map func as)
 -- prop> \x -> filter (const True) x == x
 --
 -- prop> \x -> filter (const False) x == Nil
-filter ::
-  (a -> Bool)
-  -> List a
-  -> List a
+filter :: (a -> Bool) -> List a -> List a
 filter _ Nil = Nil
-filter expr (a :. Nil) =
-  if expr a then (a :. Nil) else Nil
+filter expr (a :. Nil) = if expr a then (a :. Nil) else Nil
 filter expr (a :. as) =
   if expr a then (a :. (filter expr as)) else (filter expr as)
 
@@ -171,12 +155,9 @@ filter expr (a :. as) =
 -- prop> \x -> (x ++ y) ++ z == x ++ (y ++ z)
 --
 -- prop> \x -> x ++ Nil == x
-(++) ::
-  List a
-  -> List a
-  -> List a
-(++) =
-  error "todo: Course.List#(++)"
+(++) :: List a -> List a -> List a
+(++) =  flip (foldRight (:.))
+
 
 infixr 5 ++
 
@@ -190,11 +171,8 @@ infixr 5 ++
 -- prop> \x -> headOr x (flatten (y :. infinity :. Nil)) == headOr 0 y
 --
 -- prop> \x -> sum (map length x) == length (flatten x)
-flatten ::
-  List (List a)
-  -> List a
-flatten =
-  error "todo: Course.List#flatten"
+flatten ::  List (List a) -> List a
+flatten xss = foldRight (++) Nil xss
 
 -- | Map a function then flatten to a list.
 --
@@ -206,22 +184,20 @@ flatten =
 -- prop> \x -> headOr x (flatMap id (y :. infinity :. Nil)) == headOr 0 y
 --
 -- prop> \x -> flatMap id (x :: List (List Int)) == flatten x
-flatMap ::
-  (a -> List b)
-  -> List a
-  -> List b
-flatMap =
-  error "todo: Course.List#flatMap"
+flatMap :: (a -> List b) -> List a -> List b
+flatMap f as = flatten (map f as)
+
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
 --
 -- prop> \x -> let types = x :: List (List Int) in flatten x == flattenAgain x
-flattenAgain ::
-  List (List a)
-  -> List a
-flattenAgain =
-  error "todo: Course.List#flattenAgain"
+flattenAgain :: List (List a) -> List a
+flattenAgain ass = flatMap id ass
+-- Because id is a function that receives and returns the same item.
+-- So flatMap will apply id for every single element in ass and flatten it, thus
+-- becoming the same as flatten.
+
 
 -- | Convert a list of optional values to an optional list of values.
 --
